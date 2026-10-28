@@ -225,6 +225,7 @@ nav button .nav-icon {
   nav button:hover { color: var(--ink); }
 }
 nav button.on { color: #ffffff; font-weight: 700; }
+nav.many button { padding: 10px 9px; font-size: 12px; gap: 4px; }
 nav button.on .nav-icon { opacity: 1; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3)); }
 
 /* Cards & Containers */
@@ -569,6 +570,16 @@ th { font-weight: 700; color: var(--mu); font-size: 13px; text-transform: upperc
   .ringw { width: 130px; height: 130px; }
   .ringc b { font-size: 34px; }
 }
+
+.shots{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0}
+.shots img{max-width:100%;max-height:340px;border-radius:12px;border:1px solid var(--card-border);display:block;background:#fff}
+.vids{display:flex;flex-direction:column;gap:12px;margin:12px 0}
+.vid iframe,.vid video{width:100%;aspect-ratio:16/9;border:0;border-radius:12px;background:#000;display:block}
+.lks{display:flex;flex-direction:column;gap:6px;margin:10px 0}
+.lk{color:var(--ac);font-weight:600;text-decoration:none;word-break:break-word}
+.lk:hover{text-decoration:underline}
+.medbox input[type=file]{display:none}
+.medbox .mchip{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:6px}
 </style>
 </head>
 <body>
@@ -595,7 +606,7 @@ const dfmt=d=>{const p=String(d).split("-");return p.length===3?p[2]+"."+p[1]+".
 const fmt=t=>String(t).split("```").map((x,i)=>i%2?`<pre>${esc(x.trim())}</pre>`:x.split(/\n\s*\n/).filter(y=>y.trim()).map(y=>`<p>${esc(y.trim()).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/`([^`]+)`/g,"<code>$1</code>")}</p>`).join("")).join("");
 const IMG={};
 const ill=k=>IMG[k]?`<div class="ill">${IMG[k]}</div>`:"";
-function apply(c){C=c;GOALS=c.goals;LEC=c.lec;QZ=c.quiz.map(x=>[x.q,x.o,x.a,x.img])}
+function apply(c){C=c;GOALS=c.goals;LEC=c.lec;QZ=c.quiz.map(x=>[x.q,x.o,x.a,x.img,x])}
 function setC(c){apply(c);save("lb_c",c);if(load("lb_v",0)!==c.v){R={};SENT=null;save("lb_r",R);save("lb_sent",null);save("lb_v",c.v)}}
 {const c=load("lb_c",null);apply(c&&c.quiz&&c.lec&&c.goals&&c.v>=DEF.v?c:DEF);if(load("lb_v",0)!==C.v){R={};SENT=null;save("lb_r",R);save("lb_sent",null);save("lb_v",C.v)}}
 async function cload(){if(!API||API.startsWith("ВСТАВЬТЕ"))return;try{const r=await fetch(API+"?action=content"),d=await r.json();if(d.content&&d.content.quiz&&d.content.v>C.v){setC(d.content);render()}}catch(e){}}
@@ -613,23 +624,25 @@ setInterval(()=>{if(tab==="journal"&&TP)jload()},15000);
 function lessonV(){
 return `<h1>Сегодня изучаем: ${esc(C.topic)}</h1>
 ${reg.name?`<div class="card" style="border-color:var(--ok-border);background:var(--ok)">✅ Вы в списке: <b>${esc(reg.name)}</b>, группа <b>${esc(reg.grp)}</b><div class="mu" style="margin-top:8px">Преподаватель видит, что вы присутствуете ✓</div><div><button class="btn" style="margin-top:10px" data-a="unreg">Изменить</button></div></div>`:`<h2>Знакомство</h2><div class="card"><label for="rn">ФИО</label><input type="text" id="rn" maxlength="80" placeholder="Иванов Иван Иванович"><label for="rg" style="margin-top:12px">Группа</label><input type="text" id="rg" maxlength="30" placeholder="Например, ИС-21"><button class="btn a" style="margin-top:16px" data-a="reg">Я на уроке</button></div>`}
-<h2>Чему научимся</h2>${GOALS.map((g,i)=>`<div class="card"><b class="mono" style="color:var(--ac)">0${i+1}</b> ${esc(g)}</div>`).join("")}`}
-function lecV(){return `<p class="mu">Открывайте темы по очереди — внутри короткое объяснение и пример кода.</p>`+LEC.map((x,i)=>`<details ${i==0?"open":""}><summary>${i+1}. ${esc(x.t)}</summary>${ill(x.img)}${fmt(x.b)}</details>`).join("")}
-function editV(){if(!D)D=JSON.parse(JSON.stringify(C));
+<h2>Чему научимся</h2>${GOALS.map((g,i)=>`<div class="card"><b class="mono" style="color:var(--ac)">0${i+1}</b> ${esc(g)}</div>`).join("")}${matV()}`}
+function lecV(){return `<p class="mu">Открывайте темы по очереди — внутри короткое объяснение и пример кода.</p>`+LEC.map((x,i)=>`<details ${i==0?"open":""}><summary>${i+1}. ${esc(x.t)}</summary>${ill(x.img)}${fmt(x.b)}${medV(x)}</details>`).join("")}
+function editV(){if(!D)D=JSON.parse(JSON.stringify(C));if(!D.mat)D.mat={};if(!D.task)D.task=JSON.parse(JSON.stringify(TASK0));
 return `<div class="card"><b>Редактор урока</b><p class="mu">Измените текст и нажмите «Сохранить для студентов». Изменения появятся у студентов при следующем открытии страницы, их старые ответы теста и рефлексии сбросятся.</p></div>
 <label>Тема</label><input type="text" data-e="topic" value="${esc(D.topic)}">
 <label style="margin-top:14px">Чему научимся (по одной в строке)</label><textarea data-e="goals">${esc(D.goals.join("\n"))}</textarea>
-<h2>Лекция</h2>${D.lec.map((x,i)=>`<div class="card"><button class="x" style="float:right" data-a="dl" data-i="${i}" aria-label="Удалить раздел">✕</button><label>Заголовок</label><input type="text" data-e="lt" data-i="${i}" value="${esc(x.t)}"><label style="margin-top:10px">Текст (пустая строка — новый абзац, код — между строками из &#96;&#96;&#96;, **жирный**)</label><textarea data-e="lb" data-i="${i}" style="min-height:150px">${esc(x.b)}</textarea></div>`).join("")}<button class="btn" data-a="al">+ Раздел</button>
-<h2>Тест</h2>${D.quiz.map((q,i)=>`<div class="card"><button class="x" style="float:right" data-a="dq" data-i="${i}" aria-label="Удалить вопрос">✕</button><label>Вопрос ${i+1}</label><input type="text" data-e="qq" data-i="${i}" value="${esc(q.q)}">${q.o.map((o,j)=>`<div style="display:flex;gap:8px;align-items:center;margin-top:6px"><input type="radio" name="k${i}" data-a="ka" data-i="${i}" data-j="${j}" ${q.a===j?"checked":""} style="width:20px;height:20px;flex:none;accent-color:var(--ac)"><input type="text" data-e="qo" data-i="${i}" data-j="${j}" value="${esc(o)}" placeholder="${"ABCD"[j]}"></div>`).join("")}<p class="mu" style="margin:6px 0 0">Кружок отмечает правильный ответ.</p></div>`).join("")}<button class="btn" data-a="aq">+ Вопрос</button>
+<h2>Материалы урока</h2><div class="card" data-sec="0" data-o="mat"><p class="mu" style="margin:0">Видео, аудио и ссылки для всех учеников. Появятся на вкладке «Урок» отдельными блоками.</p>${edMedia(D.mat,0,"mat")}</div>
+<h2>Лекция</h2>${D.lec.map((x,i)=>`<div class="card" data-sec="${i}" data-o="lec"><button class="x" style="float:right" data-a="dl" data-i="${i}" aria-label="Удалить раздел">✕</button><label>Заголовок</label><input type="text" data-e="lt" data-i="${i}" value="${esc(x.t)}"><label style="margin-top:10px">Текст (пустая строка — новый абзац, код — между строками из &#96;&#96;&#96;, **жирный**)</label><textarea data-e="lb" data-i="${i}" style="min-height:150px">${esc(x.b)}</textarea>${edMedia(x,i)}</div>`).join("")}<button class="btn" data-a="al">+ Раздел</button>
+<h2>Задание</h2><div class="card" data-sec="0" data-o="task"><label>Заголовок</label><input type="text" data-e="tt" value="${esc(D.task.t)}"><label style="margin-top:10px">Текст задания</label><textarea data-e="tb" style="min-height:110px">${esc(D.task.b)}</textarea>${edMedia(D.task,0,"task")}</div>
+<h2>Тест</h2>${D.quiz.map((q,i)=>`<div class="card" data-sec="${i}" data-o="quiz"><button class="x" style="float:right" data-a="dq" data-i="${i}" aria-label="Удалить вопрос">✕</button><label>Вопрос ${i+1}</label><input type="text" data-e="qq" data-i="${i}" value="${esc(q.q)}">${q.o.map((o,j)=>`<div style="display:flex;gap:8px;align-items:center;margin-top:6px"><input type="radio" name="k${i}" data-a="ka" data-i="${i}" data-j="${j}" ${q.a===j?"checked":""} style="width:20px;height:20px;flex:none;accent-color:var(--ac)"><input type="text" data-e="qo" data-i="${i}" data-j="${j}" value="${esc(o)}" placeholder="${"ABCD"[j]}"></div>`).join("")}<p class="mu" style="margin:6px 0 0">Кружок отмечает правильный ответ.</p>${edMedia(q,i,"quiz")}</div>`).join("")}<button class="btn" data-a="aq">+ Вопрос</button>
 <div style="margin-top:22px"><button class="btn a" data-a="esv">Сохранить для студентов</button> <button class="btn" data-a="ers">Вернуть исходный текст</button> <span class="mu">${esc(EM)}</span></div>`}
 function edIn(x){const e=x.dataset&&x.dataset.e;if(!e)return;const i=+x.dataset.i,j=+x.dataset.j;
-if(e==="topic")D.topic=x.value;else if(e==="goals")D.goals=x.value.split("\n").map(z=>z.trim()).filter(Boolean);else if(e==="lt")D.lec[i].t=x.value;else if(e==="lb")D.lec[i].b=x.value;else if(e==="qq")D.quiz[i].q=x.value;else if(e==="qo")D.quiz[i].o[j]=x.value}
+if(e==="topic")D.topic=x.value;else if(e==="goals")D.goals=x.value.split("\n").map(z=>z.trim()).filter(Boolean);else if(e==="lt")D.lec[i].t=x.value;else if(e==="lb")D.lec[i].b=x.value;else if(e==="qq")D.quiz[i].q=x.value;else if(e==="qo")D.quiz[i].o[j]=x.value;else if(e==="ll")own(x.dataset.o,i).links[j].t=x.value;else if(e==="lu")own(x.dataset.o,i).links[j].u=x.value;else if(e==="tt")D.task.t=x.value;else if(e==="tb")D.task.b=x.value}
 function esave(){const pin=TP||prompt("PIN преподавателя");if(!pin)return;
 if(!D.topic.trim()||!D.quiz.length||D.quiz.some(q=>!q.q.trim()||q.o.some(o=>!o.trim()))){EM="Заполните тему, все вопросы и варианты ответов";render();return}
 const c={...D,v:Date.now()};post({action:"saveContent",pin,content:c});EM="Сохраняю…";render();
 setTimeout(async()=>{try{const r=await fetch(API+"?action=content"),d=await r.json();if(d.content&&d.content.v===c.v){setC(d.content);EM="Сохранено ✓";TP=pin;save("lb_pin",pin)}else EM="Не удалось сохранить: проверьте PIN и адрес скрипта"}catch(e){EM="Не удалось проверить сохранение"}render()},2500)}
 function testV(){const sc=QZ.reduce((a,q,i)=>a+(ans[i]===q[2]?1:0),0),p=Math.round(sc/QZ.length*100);
-return (sub?`<div class="card"><span class="mu">Ваш счёт</span><div class="score">${sc}/${QZ.length} · ${p}%</div></div>`:"")+QZ.map((q,i)=>`<div class="card"><b class="mono">${i+1}.</b> ${esc(q[0])}${ill(q[3])}${q[1].map((o,j)=>`<button class="opt ${sub?(j===q[2]?"r":ans[i]===j?"w":""):(ans[i]===j?"sel":"")}" data-a="ans" data-i="${i}" data-j="${j}"><b class="mono">${"ABCD"[j]}</b> ${esc(o)}</button>`).join("")}</div>`).join("")+(sub?`<button class="btn" data-a="retry">Попробовать ещё раз</button>`:`<button class="btn a" data-a="fin">Узнать результат</button>`)}
+return (sub?`<div class="card"><span class="mu">Ваш счёт</span><div class="score">${sc}/${QZ.length} · ${p}%</div></div>`:"")+QZ.map((q,i)=>`<div class="card"><b class="mono">${i+1}.</b> ${esc(q[0])}${ill(q[3])}${medV(q[4])}${q[1].map((o,j)=>`<button class="opt ${sub?(j===q[2]?"r":ans[i]===j?"w":""):(ans[i]===j?"sel":"")}" data-a="ans" data-i="${i}" data-j="${j}"><b class="mono">${"ABCD"[j]}</b> ${esc(o)}</button>`).join("")}</div>`).join("")+(sub?`<button class="btn" data-a="retry">Попробовать ещё раз</button>`:`<button class="btn a" data-a="fin">Узнать результат</button>`)}
 const RX={love:["😍","❤️"],ok:["🙂","✨"],hard:["😕","❓"]};
 function burst(btn,k){const e=btn.querySelector(".e");e.classList.remove("pop");void e.offsetWidth;e.classList.add("pop");for(let i=0;i<8;i++){const sp=document.createElement("span");sp.className="pt";sp.textContent=RX[k][i%2];sp.style.cssText="--dx:"+((Math.random()-.5)*130).toFixed(0)+"px;--dy:"+(-(70+Math.random()*70)).toFixed(0)+"px;--r:"+((Math.random()-.5)*70).toFixed(0)+"deg;animation-delay:"+(i*35)+"ms;font-size:"+(16+Math.random()*14).toFixed(0)+"px";btn.appendChild(sp);setTimeout(()=>sp.remove(),1500)}}
 const lvl=p=>p>=90?"отлично":p>=70?"хорошо":p>=50?"нормально":"стоит повторить";
@@ -659,12 +672,12 @@ return `<h2>Реакция на урок</h2><div class="reacts ${R.rx?"has":""}
 <h2>Мой результат</h2><div id="rbox">${sum()}</div>
 <h2>Сдать результат</h2><div id="sbox">${sendBox()}</div>
 <p class="mu" style="margin-top:16px">Изменения запоминаются сами — ничего нажимать не нужно.</p>`}
-function moveThumb(){const nv=$("#nav"),t=nv.querySelector(".thumb"),b=nv.querySelector("button.on");if(!t||!b)return;t.style.width=b.offsetWidth+"px";t.style.transform="translateX("+b.offsetLeft+"px)";if(!nv.classList.contains("ready"))requestAnimationFrame(()=>requestAnimationFrame(()=>nv.classList.add("ready")))}
+function moveThumb(){const nv=$("#nav"),t=nv.querySelector(".thumb"),b=nv.querySelector("button.on");if(!t||!b)return;t.style.width=b.offsetWidth+"px";t.style.transform="translateX("+b.offsetLeft+"px)";nv.scrollLeft=Math.max(0,b.offsetLeft-(nv.clientWidth-b.offsetWidth)/2);if(!nv.classList.contains("ready"))requestAnimationFrame(()=>requestAnimationFrame(()=>nv.classList.add("ready")))}
 function render(){if((tab==="journal"||tab==="edit")&&location.hash!=="#teacher")tab="lesson";
 const navIcons={lesson:"📌",lecture:"📖",task:"💻",test:"🎯",reflect:"✨",journal:"📊",edit:"✏️"};
 const items=[["lesson","Урок"],["lecture","Конспект"],["task","Задание"],["test","Тест"],["reflect","Рефлексия"]].concat(location.hash==="#teacher"?[["journal","Журнал"],["edit","Редактор"]]:[]);
 const nv=$("#nav"),key=items.map(x=>x[0]).join();
-if(nv.dataset.key!==key){nv.dataset.key=key;nv.classList.remove("ready");nv.innerHTML='<i class="hv"></i><i class="thumb"></i>'+items.map(([k,l])=>`<button data-tab="${k}"><span class="nav-icon">${navIcons[k]||""}</span><span>${l}</span></button>`).join("")}
+if(nv.dataset.key!==key){nv.dataset.key=key;nv.classList.toggle("many",items.length>5);nv.classList.remove("ready");nv.innerHTML='<i class="hv"></i><i class="thumb"></i>'+items.map(([k,l])=>`<button data-tab="${k}"><span class="nav-icon">${navIcons[k]||""}</span><span>${l}</span></button>`).join("")}
 nv.querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.tab===tab));
 moveThumb();
 $("#v").innerHTML={lesson:lessonV,lecture:lecV,task:taskV,test:testV,reflect:reflV,journal:jourV,edit:editV}[tab]();if(tab==="reflect"){const sb=$("#sbox");if(sb)sb._h=sendBox();requestAnimationFrame(()=>requestAnimationFrame(rbUpdate))}}
@@ -705,12 +718,10 @@ function chkH(){const n=CHK.filter(x=>x[1](CODE)).length;return `<div class="bar
 function runPrev(){const f=$("#pv");if(!f)return;let c=CODE;MEDIA.forEach(m=>{c=c.split(m.name).join(m.url)});
 f.setAttribute("sandbox",/<iframe\b/i.test(c)?"allow-scripts allow-popups allow-presentation":"allow-same-origin");
 f.srcdoc='<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><body style="font-family:system-ui,sans-serif;margin:12px;color:#111;background:#fff">'+c}
-function taskV(){requestAnimationFrame(runPrev);
-return `<h2>Практическое задание</h2><div class="card"><b>Соберите свою медиа-страницу.</b><p class="mu" style="margin:6px 0 0">Добавьте видео или аудио со своего устройства (или ссылку), вставьте их в код и проверьте результат в окне ниже. Подсказки — на вкладке «Конспект».</p></div>
+function taskV(){requestAnimationFrame(runPrev);const T=C.task||TASK0;MEDIA=[...(T.vids||[]).map(u=>({name:u,url:u,kind:"video",type:""})),...(T.auds||[]).map(u=>({name:u,url:u,kind:"audio",type:""}))];
+return `<h2>Практическое задание</h2><div class="card"><b>${esc(T.t)}</b><p class="mu" style="margin:6px 0 0">${esc(T.b).replace(/\n/g,"<br>")}</p>${medV(T)}</div>
 <h2>Что нужно сделать</h2><div class="card" id="chk">${chkH()}</div>
-<h2>Ваши файлы</h2><div class="card"><label class="btn fl">🎬 Добавить видео<input type="file" id="fv" accept="video/*"></label><label class="btn fl">🎧 Добавить аудио<input type="file" id="fa" accept="audio/*"></label>
-<div style="display:flex;gap:8px;margin-top:6px"><input type="text" id="mlink" placeholder="Или ссылка: https://…/video.mp4"><button class="btn" data-a="addu">Добавить</button></div>
-${MEDIA.length?MEDIA.map((m,i)=>`<div class="mchip"><span>${m.kind==="video"?"🎬":"🎧"} ${esc(m.name)}</span><button class="btn" data-a="ins" data-i="${i}">Вставить в код</button></div>`).join(""):`<p class="mu" style="margin:10px 0 0">Файлы хранятся только на вашем устройстве и пропадают при перезагрузке страницы.</p>`}</div>
+<h2>Файлы для задания</h2><div class="card">${MEDIA.length?MEDIA.map((m,i)=>`<div class="mchip"><span>${m.kind==="video"?"🎬":"🎧"} ${esc(m.name.length>46?m.name.slice(0,46)+"…":m.name)}</span><button class="btn" data-a="ins" data-i="${i}">Вставить в код</button></div>`).join(""):`<p class="mu" style="margin:0">Преподаватель пока не добавил файлы для задания.</p>`}</div>
 <h2>HTML-код</h2><textarea id="code" spellcheck="false" autocapitalize="off" autocomplete="off">${esc(CODE)}</textarea>
 <div style="display:flex;gap:8px;margin:12px 0 0;flex-wrap:wrap"><button class="btn a" data-a="run">▶ Запустить</button><button class="btn" data-a="rst">Сбросить код</button></div>
 <h2>Результат</h2><iframe class="pv" id="pv" title="Результат"></iframe>`}
@@ -719,11 +730,57 @@ if(a==="run"){runPrev()}
 else if(a==="rst"){if(confirm("Сбросить код к начальному?")){CODE=STARTER;save("lb_code",CODE);render()}}
 else if(a==="addu"){const i=$("#mlink"),u=i.value.trim();if(!/^https?:\/\//i.test(u)){i.focus();return}MEDIA.push({name:u,url:u,kind:/\.(mp3|wav|ogg|m4a|aac)(\?|$)/i.test(u)?"audio":"video",type:""});render()}
 else if(a==="ins"){const m=MEDIA[+b.dataset.i],t=$("#code");if(!m||!t)return;const tag=m.kind,mt=m.type||(tag==="video"?"video/mp4":"audio/mpeg");
-const s=`<${tag} controls${tag==="video"?' width="480"':""}>\n  <source src="${m.name.replace(/"/g,"")}" type="${mt}">\n  Ваш браузер не поддерживает ${tag==="video"?"видео":"аудио"}.\n</${tag}>\n`;
-const p=t.selectionStart;t.value=t.value.slice(0,p)+s+t.value.slice(t.selectionEnd);CODE=t.value;save("lb_code",CODE);t.focus();t.selectionStart=t.selectionEnd=p+s.length;$("#chk").innerHTML=chkH();runPrev
-()}});
+let s=`<${tag} controls${tag==="video"?' width="480"':""}>\n  <source src="${m.name.replace(/"/g,"")}" type="${mt}">\n  Ваш браузер не поддерживает ${tag==="video"?"видео":"аудио"}.\n</${tag}>\n`;
+{const y=m.name.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|embed\/))([\w-]{11})/),g=m.name.match(/drive\.google\.com\/file\/d\/([\w-]+)/);if(y)s=`<iframe width="480" height="270" src="https://www.youtube.com/embed/${y[1]}" allowfullscreen></iframe>\n`;else if(g)s=`<iframe width="480" height="270" src="https://drive.google.com/file/d/${g[1]}/preview" allowfullscreen></iframe>\n`}
+const p=t.selectionStart;t.value=t.value.slice(0,p)+s+t.value.slice(t.selectionEnd);CODE=t.value;save("lb_code",CODE);t.focus();t.selectionStart=t.selectionEnd=p+s.length;$("#chk").innerHTML=chkH();runPrev()}});
 document.addEventListener("input",e=>{if(e.target.id==="code"){CODE=e.target.value;save("lb_code",CODE);const c=$("#chk");if(c)c.innerHTML=chkH()}});
 document.addEventListener("change",e=>{const t=e.target;if(t.id!=="fv"&&t.id!=="fa")return;const f=t.files&&t.files[0];if(!f)return;MEDIA.push({name:f.name,url:URL.createObjectURL(f),kind:t.id==="fv"?"video":"audio",type:f.type});t.value="";render()});
+
+const TASK0={t:"Соберите свою медиа-страницу.",b:"Добавьте видео или аудио со своего устройства (или ссылку), вставьте их в код и проверьте результат в окне ниже. Подсказки — на вкладке «Конспект»."};
+const own=(o,i)=>o==="mat"?D.mat:o==="quiz"?D.quiz[i]:o==="task"?D.task:D.lec[i];
+function vidEmb(u){let m;if(m=u.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|embed\/))([\w-]{11})/))return`<iframe src="https://www.youtube.com/embed/${m[1]}" allowfullscreen loading="lazy"></iframe>`;
+if(m=u.match(/drive\.google\.com\/file\/d\/([\w-]+)/))return`<iframe src="https://drive.google.com/file/d/${m[1]}/preview" allowfullscreen loading="lazy"></iframe>`;
+if(/\.(mp4|webm|ogg|mov)(\?|$)/i.test(u))return`<video src="${esc(u)}" controls preload="metadata"></video>`;
+return`<a class="lk" href="${esc(u)}" target="_blank" rel="noopener">🎬 ${esc(u)}</a>`}
+function audEmb(u){let m;if(m=u.match(/drive\.google\.com\/file\/d\/([\w-]+)/))return`<iframe src="https://drive.google.com/file/d/${m[1]}/preview" style="width:100%;height:80px;border:0" loading="lazy"></iframe>`;
+if(/\.(mp3|wav|ogg|m4a|aac)(\?|$)/i.test(u))return`<audio src="${esc(u)}" controls preload="metadata" style="width:100%"></audio>`;
+return`<a class="lk" href="${esc(u)}" target="_blank" rel="noopener">🎧 ${esc(u)}</a>`}
+function medV(x,h){x=x||{};const L=(x.links||[]).filter(l=>/^https?:\/\//i.test(l.u)),I=(x.imgs||[]).filter(u=>/^(https:\/\/|data:image\/jpeg;base64,)/i.test(u)),V=(x.vids||[]).filter(u=>/^https:\/\//i.test(u)),A=(x.auds||[]).filter(u=>/^https:\/\//i.test(u));
+const H=t=>h?`<div class="mu" style="font-weight:700;margin:14px 0 4px">${t}</div>`:"";
+return (V.length?H("🎬 Видео")+`<div class="vids">${V.map(u=>`<div class="vid">${vidEmb(u)}</div>`).join("")}</div>`:"")
++(A.length?H("🎧 Аудио")+`<div class="vids">${A.map(u=>audEmb(u)).join("")}</div>`:"")
++(I.length?H("🖼 Картинки")+`<div class="shots">${I.map(u=>`<a href="${esc(u)}" target="_blank" rel="noopener"><img src="${esc(u)}" alt="Скриншот" loading="lazy" referrerpolicy="no-referrer"></a>`).join("")}</div>`:"")
++(L.length?H("🔗 Ссылки")+`<div class="lks">${L.map(l=>`<a class="lk" href="${esc(l.u)}" target="_blank" rel="noopener">🔗 ${esc(l.t||l.u)}</a>`).join("")}</div>`:"")}
+function matV(){const M=C.mat,h=medV(M,true);return h?`<h2>Материалы урока</h2><div class="card">${h}</div>`:""}
+function edMedia(x,i,o){o=o||"lec";const L=x.links||[],I=x.imgs||[];
+return `<div class="medbox"><label style="margin-top:14px">Скриншоты</label>${I.map((u,k)=>`<div class="mchip"><span>🖼 ${esc(u.slice(0,48))}…</span><button class="x" data-a="imd" data-i="${i}" data-o="${o}" data-j="${k}" aria-label="Удалить">✕</button></div>`).join("")}
+<div style="margin-top:8px"><label class="btn fl">📷 Загрузить скриншот<input type="file" accept="image/*" data-sh="${i}" data-o="${o}"></label></div>
+<p class="mu" style="margin:6px 0 0">Можно перетащить картинку из папки прямо на этот блок или нажать Ctrl+V, если скриншот в буфере.</p>
+<div style="display:flex;gap:8px;margin-top:8px"><input type="text" id="iu${o}${i}" placeholder="Или ссылка на картинку https://…"><button class="btn" data-a="ima" data-i="${i}" data-o="${o}">Добавить</button></div>
+<label style="margin-top:14px">Видео</label>${(x.vids||[]).map((u,k)=>`<div class="mchip"><span>🎬 ${esc(u.slice(0,48))}</span><button class="x" data-a="vdd" data-i="${i}" data-j="${k}" data-o="${o}" aria-label="Удалить видео">✕</button></div>`).join("")}
+<div style="display:flex;gap:8px;margin-top:6px"><input type="text" id="vu${o}${i}" placeholder="Ссылка на видео: YouTube, Google Диск или .mp4"><button class="btn" data-a="vda" data-i="${i}" data-o="${o}">Добавить</button></div>
+<label style="margin-top:14px">Аудио</label>${(x.auds||[]).map((u,k)=>`<div class="mchip"><span>🎧 ${esc(u.slice(0,48))}</span><button class="x" data-a="aud" data-i="${i}" data-j="${k}" data-o="${o}" aria-label="Удалить аудио">✕</button></div>`).join("")}
+<div style="display:flex;gap:8px;margin-top:6px"><input type="text" id="au${o}${i}" placeholder="Ссылка на аудио: Google Диск или .mp3"><button class="btn" data-a="aua" data-i="${i}" data-o="${o}">Добавить</button></div>
+<label style="margin-top:14px">Ссылки</label>${L.map((l,k)=>`<div style="display:flex;gap:8px;margin-top:6px"><input type="text" data-e="ll" data-o="${o}" data-i="${i}" data-j="${k}" value="${esc(l.t||"")}" placeholder="Название"><input type="text" data-e="lu" data-o="${o}" data-i="${i}" data-j="${k}" value="${esc(l.u||"")}" placeholder="https://…"><button class="x" data-a="lkd" data-i="${i}" data-j="${k}" data-o="${o}" aria-label="Удалить ссылку">✕</button></div>`).join("")}
+<button class="btn" style="margin-top:8px" data-a="lka" data-i="${i}" data-o="${o}">+ Ссылка</button></div>`}
+function shrink(f,mx,q){return new Promise((ok,no)=>{const u=URL.createObjectURL(f),im=new Image();im.onload=()=>{const k=Math.min(1,mx/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);const g=c.getContext("2d");g.fillStyle="#fff";g.fillRect(0,0,c.width,c.height);g.drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);ok(c.toDataURL("image/jpeg",q))};im.onerror=no;im.src=u})}
+async function upImg(f,i,o){if(!f.type.startsWith("image/")){alert("Это не картинка");return}const S=own(o,i);let url="";
+try{const pin=TP||prompt("PIN преподавателя")||"",data=await shrink(f,1200,.8),r=await fetch(API,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action:"uploadImage",pin,data})}),d=await r.json();if(d&&d.url)url=d.url;else if(d&&d.error)alert("Скрипт ответил: "+d.error)}catch(e){}
+if(!url){try{url=await shrink(f,640,.6);if(url.length>45000)url=await shrink(f,480,.5)}catch(e){alert("Не удалось прочитать картинку");return}EM="Картинка встроена в сайт в уменьшенном виде. Нажмите «Сохранить для студентов»"}else EM="Скриншот добавлен. Нажмите «Сохранить для студентов»";
+(S.imgs=S.imgs||[]).push(url);render()}
+document.addEventListener("click",e=>{const b=e.target.closest("button");if(!b||!D)return;const d=b.dataset;if(!d.o)return;const i=+d.i,j=+d.j,S=own(d.o,i);
+if(d.a==="lka"){(S.links=S.links||[]).push({t:"",u:""});render()}
+else if(d.a==="lkd"){S.links.splice(j,1);render()}
+else if(d.a==="vda"){const el=$("#vu"+d.o+i),u=el.value.trim();if(!/^https:\/\//i.test(u)){alert("Нужна ссылка, начинающаяся с https://");el.focus();return}(S.vids=S.vids||[]).push(u);render()}
+else if(d.a==="aua"){const el=$("#au"+d.o+i),u=el.value.trim();if(!/^https:\/\//i.test(u)){alert("Нужна ссылка, начинающаяся с https://");el.focus();return}(S.auds=S.auds||[]).push(u);render()}
+else if(d.a==="aud"){S.auds.splice(j,1);render()}
+else if(d.a==="vdd"){S.vids.splice(j,1);render()}
+else if(d.a==="imd"){S.imgs.splice(j,1);render()}
+else if(d.a==="ima"){const el=$("#iu"+d.o+i),u=el.value.trim();if(!/^https:\/\//i.test(u)){alert("Нужна ссылка на картинку, начинающаяся с https://");el.focus();return}(S.imgs=S.imgs||[]).push(u);render()}});
+document.addEventListener("change",e=>{const t=e.target;if(t.dataset&&t.dataset.sh!==undefined&&t.files&&t.files[0]){upImg(t.files[0],+t.dataset.sh,t.dataset.o);t.value=""}});
+document.addEventListener("paste",e=>{if(tab!=="edit"||!D)return;const s=e.target.closest&&e.target.closest("[data-sec]");if(!s)return;const f=[...((e.clipboardData&&e.clipboardData.files)||[])].find(x=>x.type.startsWith("image/"));if(f){e.preventDefault();upImg(f,+s.dataset.sec,s.dataset.o)}});
+document.addEventListener("dragover",e=>{if(tab==="edit"&&e.target.closest&&e.target.closest("[data-sec]"))e.preventDefault()});
+document.addEventListener("drop",e=>{if(tab!=="edit"||!D)return;const s=e.target.closest&&e.target.closest("[data-sec]");if(!s)return;const f=[...((e.dataTransfer&&e.dataTransfer.files)||[])].find(x=>x.type.startsWith("image/"));if(f){e.preventDefault();upImg(f,+s.dataset.sec,s.dataset.o)}});
 window.addEventListener("hashchange",render);
 document.addEventListener("mouseover",e=>{if(!matchMedia("(hover:hover)").matches)return;const b=e.target.closest&&e.target.closest("#nav button");if(!b)return;const hv=$("#nav .hv");if(!hv)return;const hidden=hv.style.opacity!=="1";if(hidden)hv.style.transition="none";hv.style.width=b.offsetWidth+"px";hv.style.transform="translateX("+b.offsetLeft+"px)";if(hidden){void hv.offsetWidth;hv.style.transition=""}hv.style.opacity="1"});
 document.addEventListener("mouseout",e=>{const n=e.target.closest&&e.target.closest("#nav");if(!n)return;const to=e.relatedTarget;if(to&&to.closest&&to.closest("#nav button"))return;const hv=$("#nav .hv");if(hv)hv.style.opacity="0"});
