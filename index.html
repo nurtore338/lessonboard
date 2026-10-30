@@ -545,6 +545,42 @@ details p { margin: 0 0 14px; }
 }
 .pv { display: block; width: 100%; height: 380px; border: 1.5px solid var(--card-border); border-radius: 14px; background: #ffffff; box-shadow: var(--shadow); }
 
+/* Мини-задания */
+.pool { display: flex; flex-wrap: wrap; gap: 4px; min-height: 52px; padding: 8px; margin: 10px 0; border: 1.5px dashed var(--card-border); border-radius: 14px; background: #faf6f0; align-items: center; }
+.tkc { display: inline-flex; align-items: center; padding: 8px 12px; border: 1.5px solid var(--card-border); border-radius: 12px; background: #fff; font-family: 'Fira Code', ui-monospace, monospace; font-weight: 600; font-size: 14px; cursor: grab; box-shadow: var(--shadow-sm); touch-action: none; user-select: none; -webkit-user-select: none; }
+.tkc.sel { border-color: var(--ac); box-shadow: 0 0 0 3px var(--ac-glow); }
+.tkc.ok { background: var(--ok); border-color: var(--ok-border); }
+.tkc.no { background: var(--bad); border-color: var(--bad-border); }
+.dz { transition: border-color .15s, background .15s; }
+.dz.over { border-color: var(--ac) !important; background: rgba(180, 83, 9, 0.07) !important; }
+.dz.row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px; margin-top: 8px; border: 1.5px dashed var(--card-border); border-radius: 14px; }
+.dz.row.done { border-style: solid; border-color: var(--ok-border); background: var(--ok); }
+.dz.row span:first-child { flex: 1; min-width: 0; font-size: 15px; font-weight: 600; }
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; }
+.dz.col { min-height: 130px; padding: 10px; border: 1.5px dashed var(--card-border); border-radius: 14px; display: flex; flex-wrap: wrap; gap: 4px; align-content: flex-start; }
+.dz.col .ct { width: 100%; font-size: 12px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--ac); margin-bottom: 2px; }
+.brow { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.dz.ord { display: flex; align-items: center; gap: 10px; padding: 8px 10px; margin-top: 8px; border: 1.5px solid var(--card-border); border-radius: 12px; background: #fff; }
+.dz.ord.ok { background: var(--ok); border-color: var(--ok-border); }
+.dz.ord.no { background: var(--bad); border-color: var(--bad-border); }
+.dz.ord code { flex: 1; min-width: 0; font-size: 13px; overflow-x: auto; white-space: nowrap; }
+.grip { flex: none; width: 34px; height: 34px; display: grid; place-items: center; border-radius: 10px; background: #faf6f0; border: 1.5px solid var(--card-border); font-size: 18px; cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; color: var(--mu); }
+.mv { display: flex; gap: 4px; }
+.mv .btn { padding: 4px 9px; min-height: 0; font-size: 12px; }
+.lift { opacity: .35; }
+.gh { position: fixed; z-index: 999; pointer-events: none; opacity: .92; transform: translate(-50%, -50%) rotate(-2deg); box-shadow: var(--shadow-lg); }
+.shk { animation: shk .45s; border-color: #dc2626 !important; }
+@keyframes shk { 0%,100% { transform: translateX(0); } 20% { transform: translateX(-7px); } 40% { transform: translateX(7px); } 60% { transform: translateX(-5px); } 80% { transform: translateX(5px); } }
+@media (max-width: 520px) { .cols { grid-template-columns: 1fr; } }
+
+/* Таблица баллов (рефлексия) */
+.rtab { padding: 6px 22px; }
+.rr { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 15px 0; border-bottom: 1px dashed var(--ln); font-size: 16px; }
+.rr b { font-size: 16px; font-weight: 700; white-space: nowrap; }
+.rr .rv, .rr .tg { font-style: normal; }
+.rr.tot { border-bottom: 0; font-weight: 800; }
+.rr.tot b { font-size: 18px; }
+
 /* Status Badges */
 .tag { display: inline-block; font-weight: 600; font-size: 12px; background: var(--ok); color: #047857; padding: 2px 10px; border-radius: 99px; border: 1px solid var(--ok-border); }
 .x { border: 0; background: none; color: var(--mu); font-size: 18px; cursor: pointer; padding: 2px 8px; border-radius: 6px; }
@@ -649,16 +685,14 @@ const lvl=p=>p>=90?"отлично":p>=70?"хорошо":p>=50?"нормальн
 const col=p=>p>=90?"#059669":p>=70?"#b45309":p>=50?"#d97706":"#dc2626";
 function tsc(){return sub?Math.round(QZ.reduce((a,q,i)=>a+(ans[i]===q[2]?1:0),0)/QZ.length*100):0}
 function rsc(){const a=Math.round(+(R.un||0)/10),c=(n=>n>=10?10:n>0?5:0)((R.ex||"").trim().length);return{a,c,t:a+c}}
-function sum(){const rows=[["t","Проверка знаний",80,'<em class="tg">не пройдена</em>'],["a","Самооценка понимания",10,""],["c","Финальная фраза",10,""],["r","Осмысление",20,""]];
-return `<div class="res"><div class="rcol"><div class="ringw"><svg class="ring" viewBox="0 0 120 120" aria-hidden="true"><circle class="bg" cx="60" cy="60" r="52"/><circle class="fg" cx="60" cy="60" r="52" pathLength="100"/></svg><div class="ringc"><b class="mono" id="rt">0</b><span>из 100</span></div></div><div class="rlvl" id="rl">&nbsp;</div></div><div class="rrows">${rows.map(([k,l,m,x])=>`<div class="rrow ${k==="r"?"sub":""}" data-k="${k}"><div class="rh"><span>${l}${x}</span><b class="mono"><i class="rv">0</i> / ${m}</b></div><div class="rb"><i></i></div></div>`).join("")}<div class="rcap" style="color:var(--mu);font-size:13px;margin-top:10px">Всего за занятие: проверка 80 + осмысление 20</div></div></div>`}
+function sum(){const rows=[["t","Тест",80],["s","Самооценивание",0],["a","Понимание темы",10],["c","Заметки и билет на выход",10],["r","Рефлексия",20]];
+return `<div class="card rtab">${rows.map(([k,l,m])=>`<div class="rr" data-k="${k}"><span>${l}</span><b class="mono">${k==="t"?'<em class="tg">не сдан · </em>':""}<i class="rv">0</i> / ${m}</b></div>`).join("")}<div class="rr tot"><span>Итого</span><b class="mono"><i id="rt">0</i> / 100</b></div></div>`}
 const RM=()=>window.matchMedia&&matchMedia("(prefers-reduced-motion:reduce)").matches;
 function cnt(el,to,dur){const from=+el.dataset.v||0;el.dataset.v=to;cancelAnimationFrame(el._r);if(from===to||RM()){el.textContent=to;return}const t0=performance.now(),st=t=>{const k=Math.min(1,(t-t0)/dur),e=1-Math.pow(1-k,3);el.textContent=Math.round(from+(to-from)*e);if(k<1)el._r=requestAnimationFrame(st)};el._r=requestAnimationFrame(st)}
-function rbUpdate(){const root=$("#rbox .res");if(!root)return;const r=rsc(),t=Math.round(tsc()*0.8),tot=t+r.t,c=col(tot),V={t:[t,80],a:[r.a,10],c:[r.c,10],r:[r.t,20]};
-root.querySelectorAll(".rrow").forEach(row=>{const [v,m]=V[row.dataset.k];cnt(row.querySelector(".rv"),v,900);row.querySelector(".rb i").style.width=(v/m*100)+"%"});
-const tg=root.querySelector(".tg");if(tg)tg.style.display=sub?"none":"inline-block";
-const fg=root.querySelector(".fg");fg.style.strokeDashoffset=100-tot;fg.style.opacity=tot>0?1:0;fg.style.stroke=c;fg.style.filter="drop-shadow(0 0 6px "+c+"44)";
-const rt=$("#rt");cnt(rt,tot,1200);rt.style.color=c;
-const rl=$("#rl");rl.style.color=c;rl.textContent=(tot>=90?"🏆 ":tot>=70?"👍 ":tot>=50?"🙂 ":"📘 ")+lvl(tot)}
+function rbUpdate(){const root=$("#rbox .rtab");if(!root)return;const r=rsc(),t=Math.round(tsc()*0.8),tot=t+r.t,V={t:t,s:0,a:r.a,c:r.c,r:r.t};
+root.querySelectorAll(".rr[data-k]").forEach(row=>cnt(row.querySelector(".rv"),V[row.dataset.k],700));
+const tg=root.querySelector(".tg");if(tg)tg.style.display=sub?"none":"inline";
+const rt=$("#rt");cnt(rt,tot,900);rt.style.color=col(tot)}
 function sendBox(){if(!reg.name)return `<div class="card" style="border-style:dashed"><span class="gate-i" style="font-size:24px">🔒</span> <b>Сначала знакомство</b><div class="mu">Представьтесь на вкладке «Урок» — так преподаватель узнает, кто вы.</div><button class="btn" style="margin-top:10px" data-tab="lesson">Перейти к знакомству →</button></div>`;
 const c=cur(),done=SENT===c,chg=SENT!==null&&!done;
 return `<div class="send"><p class="mu" style="margin:0 0 12px">Сдайте результат — и преподаватель увидит ваш балл в журнале.</p><div class="send-row" style="display:flex;gap:12px;align-items:center"><button class="btn a" data-a="snd">Сдать результат</button><span class="st ${done?"done":""}">${done?'<i class="chk">✓</i> Сдано':chg?"Баллы изменились — сдайте ещё раз":""}</span></div></div>`}
@@ -718,13 +752,59 @@ function chkH(){const n=CHK.filter(x=>x[1](CODE)).length;return `<div class="bar
 function runPrev(){const f=$("#pv");if(!f)return;let c=CODE;MEDIA.forEach(m=>{c=c.split(m.name).join(m.url)});
 f.setAttribute("sandbox",/<iframe\b/i.test(c)?"allow-scripts allow-popups allow-presentation":"allow-same-origin");
 f.srcdoc='<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><body style="font-family:system-ui,sans-serif;margin:12px;color:#111;background:#fff">'+c}
-function taskV(){requestAnimationFrame(runPrev);const T=C.task||TASK0;MEDIA=[...(T.vids||[]).map(u=>({name:u,url:u,kind:"video",type:""})),...(T.auds||[]).map(u=>({name:u,url:u,kind:"audio",type:""}))];
-return `<h2>Практическое задание</h2><div class="card"><b>${esc(T.t)}</b><p class="mu" style="margin:6px 0 0">${esc(T.b).replace(/\n/g,"<br>")}</p>${medV(T)}</div>
-<h2>Что нужно сделать</h2><div class="card" id="chk">${chkH()}</div>
-<h2>Файлы для задания</h2><div class="card">${MEDIA.length?MEDIA.map((m,i)=>`<div class="mchip"><span>${m.kind==="video"?"🎬":"🎧"} ${esc(m.name.length>46?m.name.slice(0,46)+"…":m.name)}</span><button class="btn" data-a="ins" data-i="${i}">Вставить в код</button></div>`).join(""):`<p class="mu" style="margin:0">Преподаватель пока не добавил файлы для задания.</p>`}</div>
-<h2>HTML-код</h2><textarea id="code" spellcheck="false" autocapitalize="off" autocomplete="off">${esc(CODE)}</textarea>
-<div style="display:flex;gap:8px;margin:12px 0 0;flex-wrap:wrap"><button class="btn a" data-a="run">▶ Запустить</button><button class="btn" data-a="rst">Сбросить код</button></div>
-<h2>Результат</h2><iframe class="pv" id="pv" title="Результат"></iframe>`}
+/* ===== Задание: три мини-задания + основное ===== */
+const TK={m1:load("lb_tk1",{}),m2:load("lb_tk2",{p:{},c:0}),m3:load("lb_tk3",null)};
+const M1=[["<video>","Вставляет на страницу видеоплеер"],["<audio>","Вставляет аудиоплеер для звука"],["<source>","Указывает файл и его формат (атрибуты src и type)"],["<track>","Подключает к видео файл с субтитрами"]];
+const M1O=[2,0,3,1];
+const M2=[["<video>","t"],["<audio>","t"],["<source>","t"],["<track>","t"],["<iframe>","t"],["controls","a"],["autoplay","a"],["loop","a"],["poster","a"],["muted","a"]];
+const M3=["<!DOCTYPE html>","<html>","<head>","<title>Моя страница</title>","</head>","<body>","<video controls src=\"film.mp4\"></video>","</body>","</html>"];
+const M3S=[6,2,8,0,4,7,1,5,3];
+if(!TK.m3||!TK.m3.o||TK.m3.o.length!==9)TK.m3={o:M3S.slice(),c:0};
+let SEL=null,DG=null,LASTDRAG=0;
+const tkSave=()=>{save("lb_tk1",TK.m1);save("lb_tk2",TK.m2);save("lb_tk3",TK.m3)};
+const rt=()=>{const y=window.scrollY;render();window.scrollTo(0,y)};
+const tkS1=()=>Object.keys(TK.m1).length*2;
+const tkS2=()=>TK.m2.c?M2.filter((x,i)=>TK.m2.p[i]===x[1]).length:0;
+const tkS3=()=>TK.m3.c?TK.m3.o.filter((v,i)=>v===i).length:0;
+function chip(id,g,l,c){const s=SEL&&SEL.g===g&&String(SEL.id)===String(id)?" sel":"";return `<div class="tkc dg${s}${c?" "+c:""}" data-id="${id}" data-g="${g}">${esc(l)}</div>`}
+function taskV(){
+const s1=tkS1(),s2=tkS2(),s3=tkS3(),tot=s1+s2+s3,P=TK.m2.p,c2=TK.m2.c,o=TK.m3.o,c3=TK.m3.c;
+let h=`<h2>Баллы за мини-задания</h2><div class="card"><div class="bar"><i style="width:${Math.round(tot/27*100)}%"></i></div><div class="mu">Набрано: <b>${tot}</b> из 27</div><p class="mu" style="margin:8px 0 0">Перетаскивайте карточки пальцем или мышью. Можно и без перетаскивания: нажмите на карточку, затем на нужное место.</p></div>`;
+h+=`<h2>Мини-задание 1 · 8 баллов</h2><div class="card"><b>Перетащите тег на его описание</b><div class="pool">${M1.map((p,i)=>TK.m1[i]?"":chip(i,"m1",p[0])).join("")||'<span class="mu">Все теги на своих местах 🎉</span>'}</div>${M1O.map(k=>`<div class="dz row${TK.m1[k]?" done":""}" data-g="m1" data-k="${k}"><span>${esc(M1[k][1])}</span>${TK.m1[k]?`<span class="tkc ok">${esc(M1[k][0])}</span>`:`<em class="mu">перетащите сюда</em>`}</div>`).join("")}<div class="mu" style="margin-top:8px">Верно: <b>${s1/2}</b> из 4</div></div>`;
+const col=(k,t)=>`<div class="dz col" data-g="m2" data-col="${k}"><div class="ct">${t}</div>${M2.map((x,i)=>P[i]===k?chip(i,"m2",x[0],c2?(x[1]===k?"ok":"no"):""):"").join("")}</div>`;
+h+=`<h2>Мини-задание 2 · 10 баллов</h2><div class="card"><b>Разложите по столбцам: теги и атрибуты</b><div class="dz pool" data-g="m2" data-col="p">${M2.map((x,i)=>P[i]?"":chip(i,"m2",x[0])).join("")||'<span class="mu">Все карточки разложены</span>'}</div><div class="cols">${col("t","Теги")}${col("a","Атрибуты")}</div><div class="brow"><button class="btn a" data-a="t2chk">Проверить</button><button class="btn" data-a="t2rs">Заново</button></div>${c2?`<div class="mu" style="margin-top:8px">Верно: <b>${s2}</b> из 10</div>`:""}</div>`;
+h+=`<h2>Мини-задание 3 · 9 баллов</h2><div class="card"><b>Расставьте карточки сверху вниз: скелет HTML-страницы</b><p class="mu" style="margin:6px 0 10px">Тяните за значок ⠿ или двигайте кнопками ▲ ▼.</p>${o.map((v,i)=>`<div class="dz ord${c3?(v===i?" ok":" no"):""}" data-g="m3" data-k="${i}"><span class="dg grip" data-id="${v}" data-g="m3" title="Перетащить">⠿</span><code>${esc(M3[v])}</code><span class="mv"><button class="btn" data-a="t3up" data-i="${i}" aria-label="Выше">▲</button><button class="btn" data-a="t3dn" data-i="${i}" aria-label="Ниже">▼</button></span></div>`).join("")}<div class="brow"><button class="btn a" data-a="t3chk">Проверить</button><button class="btn" data-a="t3rs">Перемешать заново</button></div>${c3?`<div class="mu" style="margin-top:8px">На своих местах: <b>${s3}</b> из 9</div>`:""}</div>`;
+const T=C.task||TASK0;
+h+=`<h2>Основное задание</h2><div class="card"><b>${esc(T.t)}</b><p class="mu" style="margin:6px 0 0">${esc(T.b).replace(/\n/g,"<br>")}</p>${medV(T)}</div>`;
+return h}
+function tkDrop(S,z){
+if(!S||!z||z.dataset.g!==S.g)return;
+if(S.g==="m1"){const k=+z.dataset.k;if(z.dataset.k==null)return;SEL=null;if(+S.id===k){TK.m1[k]=1;tkSave();rt()}else{rt();const zz=document.querySelector('[data-g="m1"][data-k="'+k+'"]');if(zz){zz.classList.add("shk");setTimeout(()=>zz.classList.remove("shk"),500)}}return}
+if(S.g==="m2"){const col=z.dataset.col;if(!col)return;if(col==="p")delete TK.m2.p[S.id];else TK.m2.p[S.id]=col;TK.m2.c=0;SEL=null;tkSave();rt();return}
+if(S.g==="m3"){const to=+z.dataset.k,o=TK.m3.o,from=o.indexOf(+S.id);if(from<0||isNaN(to))return;o.splice(from,1);o.splice(to,0,+S.id);TK.m3.c=0;SEL=null;tkSave();rt()}}
+document.addEventListener("pointerdown",e=>{const el=e.target.closest&&e.target.closest(".dg");if(!el||e.button>0)return;DG={el,id:el.dataset.id,g:el.dataset.g,x:e.clientX,y:e.clientY,mv:false,gh:null}});
+document.addEventListener("pointermove",e=>{if(!DG)return;if(!DG.mv){if(Math.hypot(e.clientX-DG.x,e.clientY-DG.y)<8)return;DG.mv=true;const r=DG.el.getBoundingClientRect(),g=DG.el.cloneNode(true);g.classList.add("gh");g.style.width=Math.min(r.width,260)+"px";document.body.appendChild(g);DG.gh=g;DG.el.classList.add("lift")}
+DG.gh.style.left=e.clientX+"px";DG.gh.style.top=e.clientY+"px";
+document.querySelectorAll(".dz.over").forEach(x=>x.classList.remove("over"));const t=document.elementFromPoint(e.clientX,e.clientY),z=t&&t.closest(".dz");if(z&&z.dataset.g===DG.g)z.classList.add("over")});
+function dgEnd(e,drop){if(!DG)return;const d=DG;DG=null;if(!d.mv)return;LASTDRAG=Date.now();if(d.gh)d.gh.remove();d.el.classList.remove("lift");document.querySelectorAll(".dz.over").forEach(x=>x.classList.remove("over"));if(drop){const t=document.elementFromPoint(e.clientX,e.clientY);tkDrop({id:d.id,g:d.g},t&&t.closest(".dz"))}}
+document.addEventListener("pointerup",e=>dgEnd(e,true));
+document.addEventListener("pointercancel",e=>dgEnd(e,false));
+document.addEventListener("click",e=>{
+if(Date.now()-LASTDRAG<350)return;
+const b=e.target.closest("button");
+if(b&&b.dataset.a&&/^t[123]/.test(b.dataset.a)){const a=b.dataset.a,o=TK.m3.o,i=+b.dataset.i;
+if(a==="t2chk"){TK.m2.c=1}
+else if(a==="t2rs"){TK.m2={p:{},c:0}}
+else if(a==="t3chk"){TK.m3.c=1}
+else if(a==="t3rs"){TK.m3={o:M3S.slice(),c:0}}
+else if(a==="t3up"&&i>0){[o[i-1],o[i]]=[o[i],o[i-1]];TK.m3.c=0}
+else if(a==="t3dn"&&i<o.length-1){[o[i+1],o[i]]=[o[i],o[i+1]];TK.m3.c=0}
+SEL=null;tkSave();rt();return}
+if(b)return;
+const dg=e.target.closest(".dg");
+if(dg){const s={id:dg.dataset.id,g:dg.dataset.g};SEL=SEL&&SEL.g===s.g&&String(SEL.id)===String(s.id)?null:s;if(tab==="task")rt();return}
+const z=e.target.closest(".dz");
+if(z&&SEL&&tab==="task")tkDrop(SEL,z)});
 document.addEventListener("click",e=>{const b=e.target.closest("button");if(!b||!b.dataset.a)return;const a=b.dataset.a;
 if(a==="run"){runPrev()}
 else if(a==="rst"){if(confirm("Сбросить код к начальному?")){CODE=STARTER;save("lb_code",CODE);render()}}
@@ -736,7 +816,7 @@ const p=t.selectionStart;t.value=t.value.slice(0,p)+s+t.value.slice(t.selectionE
 document.addEventListener("input",e=>{if(e.target.id==="code"){CODE=e.target.value;save("lb_code",CODE);const c=$("#chk");if(c)c.innerHTML=chkH()}});
 document.addEventListener("change",e=>{const t=e.target;if(t.id!=="fv"&&t.id!=="fa")return;const f=t.files&&t.files[0];if(!f)return;MEDIA.push({name:f.name,url:URL.createObjectURL(f),kind:t.id==="fv"?"video":"audio",type:f.type});t.value="";render()});
 
-const TASK0={t:"Соберите свою медиа-страницу.",b:"Добавьте видео или аудио со своего устройства (или ссылку), вставьте их в код и проверьте результат в окне ниже. Подсказки — на вкладке «Конспект»."};
+const TASK0={t:"Основное задание: сайт о композиторе",b:"№1. Создайте сайт о композиторе. Он состоит из файлов index.html, header.html, menu.html, main.html и footer.html: страница index.html собирает остальные части с помощью фреймов (iframe). В main.html разместите фото, рассказ о жизни композитора, видео и аудио с его произведением (теги video и audio).\n\n№2. Сгенерируйте такой же сайт с помощью ИИ: попросите нейросеть написать CSS и JS, взяв за основу код из main.html, и подключите их к своим страницам."};
 const own=(o,i)=>o==="mat"?D.mat:o==="quiz"?D.quiz[i]:o==="task"?D.task:D.lec[i];
 function vidEmb(u){let m;if(m=u.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|embed\/))([\w-]{11})/))return`<iframe src="https://www.youtube.com/embed/${m[1]}" allowfullscreen loading="lazy"></iframe>`;
 if(m=u.match(/drive\.google\.com\/file\/d\/([\w-]+)/))return`<iframe src="https://drive.google.com/file/d/${m[1]}/preview" allowfullscreen loading="lazy"></iframe>`;
